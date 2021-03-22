@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using BooksApi.Contracts;
 using BooksApi.Domain;
@@ -23,12 +24,12 @@ namespace BooksApi.Controllers
         }
 
         // api/reviews/1
-        [HttpGet("{id}")]
+        [HttpGet("{id:guid}")]
         public async Task<IActionResult> Get(Guid id)
         {
             return (await _reviewService.GetReviewById(id))
                 .Match<IActionResult>(
-                    Ok,
+                    review => Ok(review.MapToReviewResponse()),
                     error => BadRequest(error.Message));
         }
 
@@ -40,7 +41,7 @@ namespace BooksApi.Controllers
 
             return (await _reviewService.GetAllReviewsByBookAsync(bookId))
                 .Match<IActionResult>(
-                    Ok,
+                    review => Ok(review.Select(r => r.MapToReviewResponse())),
                     error => BadRequest(error));
         }
 
